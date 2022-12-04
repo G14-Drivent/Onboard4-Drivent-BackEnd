@@ -15,3 +15,23 @@ export async function getBooking(req: AuthenticatedRequest, res: Response) {
     }
   }
 }
+
+export async function createBooking(req: AuthenticatedRequest, res: Response) {
+  const userId = Number(req.userId);
+  const { roomId } = req.body;
+
+  try {
+    const booking = await bookingService.createNewBooking({ roomId, userId });
+    res.status(httpStatus.OK).send(booking);
+  } catch (error) {
+    if (error.name === "NotFoundError") {
+      return res.sendStatus(httpStatus.NOT_FOUND);
+    }
+    if (error.name === "ConflictError") {
+      return res.sendStatus(httpStatus.FORBIDDEN);
+    }
+    if (error.name === "CannotListHotelsError") {
+      return res.sendStatus(httpStatus.FORBIDDEN);
+    }
+  }
+}

@@ -33,14 +33,32 @@ async function createNewBooking({ roomId, userId }: Pick<Booking, "roomId" | "us
 
   const data = { roomId, userId };
   const booking = await bookingRepository.upsert(0, data);
+  
   return { 
     bookingId: booking.id
   };
 }
 
+async function updateOneBooking({ id, roomId, userId }: Pick<Booking, "id" | "roomId" | "userId">) {
+  await checkRoomAvailable(roomId);
+  await hotelService.listHotels(userId);
+  const booking = await getBookingByUser(userId);
+  if(!booking || booking.id !== id) {
+    throw conflictError("User booking not found");
+  }
+
+  const data = { roomId, userId };
+  const updatedBooking = await bookingRepository.upsert(id, data);
+
+  return { 
+    bookingId: updatedBooking.id
+  };
+}
+
 const bookingService = {
   getBookingByUser,
-  createNewBooking
+  createNewBooking,
+  updateOneBooking
 };
   
 export default bookingService;

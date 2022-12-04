@@ -23,7 +23,7 @@ async function findRoom(roomId: number) {
   });
 }
 
-async function upsert(bookingId: number, data: UpsertBookingParams) {
+async function upsert(id: number, data: UpsertBookingParams) {
   return prisma.booking.upsert({
     create: {
       userId: data.userId,
@@ -34,7 +34,7 @@ async function upsert(bookingId: number, data: UpsertBookingParams) {
       roomId: data.roomId
     },        
     where: {
-      id: bookingId
+      id
     }
   });
 }

@@ -30,12 +30,16 @@ async function checkRoomAvailable(roomId: number) {
 async function createNewBooking({ roomId, userId }: Pick<Booking, "roomId" | "userId">) {
   await checkRoomAvailable(roomId);
   await hotelService.listHotels(userId);
+  const booking = await getBookingByUser(userId);
+  if(booking) {
+    throw conflictError("user already has a booking");
+  }
 
   const data = { roomId, userId };
-  const booking = await bookingRepository.upsert(0, data);
-  
+  const newBooking = await bookingRepository.upsert(0, data);
+
   return { 
-    bookingId: booking.id
+    bookingId: newBooking.id
   };
 }
 

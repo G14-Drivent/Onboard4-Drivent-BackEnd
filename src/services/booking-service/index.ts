@@ -1,4 +1,4 @@
-import { conflictError, notFoundError } from "@/errors";
+import { forbiddenError, notFoundError } from "@/errors";
 import bookingRepository from "@/repositories/booking-repository";
 import { Booking } from "@prisma/client";
 import hotelService from "../hotels-service";
@@ -23,7 +23,7 @@ async function checkRoomAvailable(roomId: number) {
     throw notFoundError();
   }
   if(room.Booking.length >= room.capacity) {
-    throw conflictError("selected room has no vacancy");
+    throw forbiddenError("selected room has no vacancy");
   }
 }
 
@@ -32,7 +32,7 @@ async function createNewBooking({ roomId, userId }: Pick<Booking, "roomId" | "us
   await checkRoomAvailable(roomId);
   const booking = await bookingRepository.find(userId);
   if(booking) {
-    throw conflictError("user already has a booking");
+    throw forbiddenError("user already has a booking");
   }
 
   const newBooking = await bookingRepository.upsert(0, { roomId, userId });
@@ -47,10 +47,10 @@ async function updateOneBooking({ id, roomId, userId }: Pick<Booking, "id" | "ro
   await checkRoomAvailable(roomId);
   const booking = await bookingRepository.find(userId);
   if(!booking || booking.id !== id) {
-    throw conflictError("user booking not found");
+    throw forbiddenError("user booking not available");
   }
   if(booking.roomId === roomId) {
-    throw conflictError("user has already booked this room");
+    throw forbiddenError("user has already booked given room");
   }
 
   const updatedBooking = await bookingRepository.upsert(id, { roomId, userId });

@@ -28,15 +28,14 @@ async function checkRoomAvailable(roomId: number) {
 }
 
 async function createNewBooking({ roomId, userId }: Pick<Booking, "roomId" | "userId">) {
-  await checkRoomAvailable(roomId);
   await hotelService.listHotels(userId);
-  const booking = await getBookingByUser(userId);
+  await checkRoomAvailable(roomId);
+  const booking = await bookingRepository.find(userId);
   if(booking) {
     throw conflictError("user already has a booking");
   }
 
-  const data = { roomId, userId };
-  const newBooking = await bookingRepository.upsert(0, data);
+  const newBooking = await bookingRepository.upsert(0, { roomId, userId });
 
   return { 
     bookingId: newBooking.id
@@ -44,15 +43,14 @@ async function createNewBooking({ roomId, userId }: Pick<Booking, "roomId" | "us
 }
 
 async function updateOneBooking({ id, roomId, userId }: Pick<Booking, "id" | "roomId" | "userId">) {
-  await checkRoomAvailable(roomId);
   await hotelService.listHotels(userId);
-  const booking = await getBookingByUser(userId);
+  await checkRoomAvailable(roomId);
+  const booking = await bookingRepository.find(userId);
   if(!booking || booking.id !== id) {
     throw conflictError("User booking not found");
   }
 
-  const data = { roomId, userId };
-  const updatedBooking = await bookingRepository.upsert(id, data);
+  const updatedBooking = await bookingRepository.upsert(id, { roomId, userId });
 
   return { 
     bookingId: updatedBooking.id

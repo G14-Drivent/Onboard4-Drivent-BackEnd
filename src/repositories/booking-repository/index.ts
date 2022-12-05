@@ -25,16 +25,15 @@ async function findRoom(roomId: number) {
 
 async function upsert(id: number, data: UpsertBookingParams) {
   return prisma.booking.upsert({
+    where: {
+      id
+    },
     create: {
       userId: data.userId,
       roomId: data.roomId
     },
     update: {
-      userId: data.userId,
       roomId: data.roomId
-    },        
-    where: {
-      id
     }
   });
 }

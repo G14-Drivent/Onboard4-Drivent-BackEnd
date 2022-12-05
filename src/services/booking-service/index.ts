@@ -47,7 +47,10 @@ async function updateOneBooking({ id, roomId, userId }: Pick<Booking, "id" | "ro
   await checkRoomAvailable(roomId);
   const booking = await bookingRepository.find(userId);
   if(!booking || booking.id !== id) {
-    throw conflictError("User booking not found");
+    throw conflictError("user booking not found");
+  }
+  if(booking.roomId === roomId) {
+    throw conflictError("user has already booked this room");
   }
 
   const updatedBooking = await bookingRepository.upsert(id, { roomId, userId });
